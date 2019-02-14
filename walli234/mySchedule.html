@@ -1,0 +1,117 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+
+<head>
+  <title>Cole's Webpage</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <script src="js/script.js"></script>
+</head>
+
+<body>
+
+  <div class="nav">
+    <ul class="nav">
+      <li class="nav"><a href="mySchedule.html">My Schedule</a></li>
+      <li class="nav"><a href="myWidgets.html">My Widgets</a></li>
+      <li class="nav"><a href="myFavoritePlaces.html">My Favorite Places</a></li>
+      <li class="nav"><a href="formInput.html">Form Input</a></li>
+    </ul>
+  </div>
+
+  <h1>My Sring 19 Schedule</h1>
+  <div class="schedAndImg">
+    <table id="scheduleTable">
+      <tr>
+        <th>Monday</th>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>11:15AM - 12:30PM</i>
+          ACCT3001
+          Hanson 1-102
+          <img class="icon" src="pictures/hanson.jpg" alt="hanson" hidden>
+        </td>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>11:00PM - 12:00AM</i>
+          Practice
+          UMN Rec Well
+          <img class="icon" src="pictures/rec.jpg" alt="rec" hidden>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Tuesday</th>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>9:45AM - 11:00AM</i>
+          CSCI5115
+          Akerman Hall 319
+          <img class="icon" src="pictures/akerman.jpg" alt="akerman" hidden>
+        </td>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>6:30PM - 9:00PM</i>
+          CSCI4131
+          Keller 3-210
+          <img class="icon" src="pictures/keller.jpg" alt="keller" hidden>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Wednesday</th>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>11:15AM - 12:30PM</i>
+          ACCT3001
+          Hanson 1-102
+          <img class="icon" src="pictures/hanson.jpg" alt="hanson" hidden>
+        </td>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>6:00PM - 9:00PM</i>
+          WORK
+          Civil Engineering Computer Lab
+          <img class="icon" src="pictures/lab.jpg" alt="lab" hidden>
+        </td>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>10:00PM - 12:00AM</i>
+          Practice
+          UMN Rec Well
+          <img class="icon" src="pictures/rec.jpg" alt="rec" hidden>
+        </td>
+      </tr>
+      <tr>
+        <th>Thursday</th>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>9:45AM - 11:00AM</i>
+          CSCI5115
+          Akerman Hall 319
+          <img class="icon" src="pictures/akerman.jpg" alt="akerman" hidden>
+        </td>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          <i>11:00AM - 4:00PM</i>
+          WORK
+          Civil Engineering Computer Lab
+          <img class="icon" src="pictures/lab.jpg" alt="lab" hidden>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Friday</th>
+        <td class="course" onmouseover="hoverEvent(this)" onmouseout="mouseoutEvent(this)">
+          Nothing Planned
+          <img class="icon" src="pictures/freetime.jpg" alt="freetime" hidden>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    <div id="slideShow">
+      <img src="pictures/keller.jpg" alt="main image" class="enlargedImage" id="enlargedImage">
+      <div id="slideButtons">
+        <button type="button" name="button">Start</button>
+        <button type="button" name="button">Stop</button>
+      </div>
+    </div>
+  </div>
+  <div id="map"></div>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2QAZXnURFMy46QaMEAH9a5mQFlCKfWCg&callback=initMap" type="text/javascript"></script>
+</body>
+
+</html>
