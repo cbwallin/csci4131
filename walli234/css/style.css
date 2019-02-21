@@ -13,9 +13,9 @@ button {
   margin: 3px;
 }
 
-td.course {
-  white-space: pre-wrap;
-  word-wrap: break-word;
+td.scheduleItem {
+  /* white-space: pre-wrap;
+  word-wrap: break-word; */
 }
 
 tr:nth-of-type(odd) {
@@ -31,8 +31,8 @@ tr:hover {
 }
 
 img.icon {
-  height: 100px;
-  width: 100px;
+  height: 50px;
+  width: 50px;
 }
 
 img.enlargedImage {

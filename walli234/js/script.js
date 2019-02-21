@@ -1,14 +1,34 @@
 function hoverEvent(x) {
   x.getElementsByTagName("img")[0].removeAttribute("hidden");
   var locationImgSrc = x.getElementsByTagName("img")[0].getAttribute("src");
-  var largeImage = document.getElementById("enlargedImage")
-  largeImage.removeAttribute("hidden");
-  largeImage.setAttribute("src", locationImgSrc);
+  // var largeImage = document.getElementById("enlargedImage")
+  // largeImage.removeAttribute("hidden");
+  // largeImage.setAttribute("src", locationImgSrc);
+}
+
+var data = ["pictures/akerman.jpg", "pictures/coffman.jpg", "pictures/freetime.jpg", "pictures/hanson.jpg", "pictures/keller.jpg", "pictures/lab.jpg", "pictures/rec.jpg", "pictures/walter.jpg"];
+var index = 0;
+
+function nextPicture() {
+  index = (index + 1) % data.length;
+  document.getElementById("enlargedImage").src = data[index];
+}
+
+
+function startShow(x) {
+  interval = setInterval(nextPicture, 2000);
+  console.log(x.innerHTML);
+}
+
+function stopShow() {
+  clearInterval(interval);
 }
 
 function mouseoutEvent(x) {
   x.getElementsByTagName("img")[0].setAttribute("hidden", true);
 }
+
+
 
 function validateForm(e) {
   let alphanumericRegex = /^[\w\-\s]*$/;
@@ -62,18 +82,74 @@ function checkPassStrength(e) {
   return false;
 }
 
+
 function initMap() {
   var uOfM = {
     lat: 44.9727,
-    lng: -93.23540000000003
+    lng: -93.23540000009003
   };
   var map = new google.maps.Map(
     document.getElementById('map'), {
       zoom: 14,
       center: uOfM
     });
-  var marker = new google.maps.Marker({
-    position: uOfM,
-    map: map
+  var geocoder = new google.maps.Geocoder();
+
+  const elements = Object.values(document.getElementsByClassName("address"));
+  const test = Object.values(document.getElementsByClassName("scheduleItem"));
+
+  const pairs = test.reduce((acc, e) => {
+    const eventNameElement = e.getElementsByClassName("eventName");
+    const addressElement = e.getElementsByClassName("address");
+    console.log(e.getElementsByClassName("address"));
+    if (eventNameElement.length && addressElement.length) {
+      return acc.concat([[eventNameElement[0].innerHTML, addressElement[0].innerHTML]]);
+    }
+    return acc;
+  }, []);
+
+
+  console.log(pairs);
+  const uniquePairs = [...new Set(pairs)];
+
+
+  const addresses = elements.map(e => e.innerHTML);
+  const uniqueAddr = [...new Set(addresses)];
+
+  uniquePairs.forEach(([name, address]) => geocodeAddress(geocoder, map, name, address));
+}
+
+function geocodeAddress(geocoder, map, name, address) {
+  console.log(window.location.pathname);
+  geocoder.geocode({'address': address}, function(results, status) {
+    if (status === 'OK') {
+      let marker = new google.maps.Marker({
+        map: map,
+        position: results[0].geometry.location,
+        icon: {
+          url: "pictures/dog.png",
+          scaledSize: new google.maps.Size(30, 30)
+        }
+      });
+
+      addInfoWindow(marker, name);
+
+    } else {
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+  });
+}
+
+function addInfoWindow(marker, locationName) {
+  let contentString = `
+    <div>
+      <h1 id="firstHeading" class="firstHeading">${locationName}</h1>
+    </div>
+  `;
+  let infowindow = new google.maps.InfoWindow({
+    content: contentString
+  });
+  marker.addListener('click', function() {
+    infowindow.open(map, marker);
   });
 }
