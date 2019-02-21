@@ -110,11 +110,31 @@
       </div>
     </div>
   </div>
-  <div id="map"></div>
+  <div id="mapAndSearch">
+    <div id="map"></div>
+    <div id="form">
+      <form id="searchForm" name="searchForm" onsubmit="searchMap(event);">
+        <label for="category">Find</label>
+        <select id="searchCategory" name="searchCategory" onchange="categoryChangeHandler(this);">
+          <option value="restaurant" selected>Restaurant</option>
+          <option value="hospital">Hospital</option>
+          <option value="parking">Parking</option>
+          <option value="supermarket">Supermarket</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="otherInput"></label>
+        <input type="text" id="otherInput" name="otherInput" placeholder="Enter other places" disabled>
+        <label for="radius">Search radius (in meters): </label>
+        <input type="text" id="radius" name="radius" required value=500>
+
+        <input id="searchButton" type="submit" value="Search">
+      </form>
+    </div>
+  </div>
   <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0"
       target="_blank">CC 3.0 BY</a></div>
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2QAZXnURFMy46QaMEAH9a5mQFlCKfWCg&libraries=places"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2QAZXnURFMy46QaMEAH9a5mQFlCKfWCg&callback=initMap" type="text/javascript"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2QAZXnURFMy46QaMEAH9a5mQFlCKfWCg&libraries=places&callback=initMap"></script>
 </body>
 
 </html>

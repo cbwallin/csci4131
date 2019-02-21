@@ -17,7 +17,6 @@ function nextPicture() {
 
 function startShow(x) {
   interval = setInterval(nextPicture, 2000);
-  console.log(x.innerHTML);
 }
 
 function stopShow() {
@@ -82,45 +81,140 @@ function checkPassStrength(e) {
   return false;
 }
 
+var markers = [];
+var map;
+var service;
+var geocoder;
+var infowindow;
+var uOfM = {
+  lat: 44.9727,
+  lng: -93.23540000009003
+};
 
 function initMap() {
-  var uOfM = {
-    lat: 44.9727,
-    lng: -93.23540000009003
-  };
-  var map = new google.maps.Map(
+  map = new google.maps.Map(
     document.getElementById('map'), {
       zoom: 14,
       center: uOfM
     });
-  var geocoder = new google.maps.Geocoder();
+  geocoder = new google.maps.Geocoder();
+  service = new google.maps.places.PlacesService(map);
+  infowindow = new google.maps.InfoWindow()
 
-  const elements = Object.values(document.getElementsByClassName("address"));
-  const test = Object.values(document.getElementsByClassName("scheduleItem"));
+  placeScheduleLocations();
+}
 
-  const pairs = test.reduce((acc, e) => {
+function getCurrentLocation() {
+  let currentPos;
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      currentPos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+    }, function() {
+      handleLocationError(true, infowindow, map.getCenter());
+    });
+  } else {
+    // Browser doesn't support Geolocation
+    handleLocationError(false, infowindow, map.getCenter());
+  }
+  return currentPos;
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, currentPos) {
+  infoWindow.setPosition(currentPos);
+  infoWindow.setContent(browserHasGeolocation ?
+                        'Error: The Geolocation service failed.' :
+                        'Error: Your browser doesn\'t support geolocation.');
+  infoWindow.open(map);
+}
+
+function placeScheduleLocations() {
+  const elements = Object.values(document.getElementsByClassName("scheduleItem"));
+  const pairs = elements.reduce((acc, e) => {
     const eventNameElement = e.getElementsByClassName("eventName");
     const addressElement = e.getElementsByClassName("address");
-    console.log(e.getElementsByClassName("address"));
     if (eventNameElement.length && addressElement.length) {
       return acc.concat([[eventNameElement[0].innerHTML, addressElement[0].innerHTML]]);
     }
     return acc;
   }, []);
 
-
-  console.log(pairs);
   const uniquePairs = [...new Set(pairs)];
-
-
-  const addresses = elements.map(e => e.innerHTML);
-  const uniqueAddr = [...new Set(addresses)];
-
   uniquePairs.forEach(([name, address]) => geocodeAddress(geocoder, map, name, address));
 }
 
+function searchMap(e) {
+  e.preventDefault();
+  var searchType, keyword;
+  const elem = document.getElementById("searchCategory");
+  if (elem.options[elem.selectedIndex].value === "other") {
+    searchType = undefined;
+    keyword = document.getElementById("otherInput").value;
+  } else {
+    searchType = elem.options[elem.selectedIndex].value;
+    keyword = undefined
+  }
+  const radius = document.getElementById("radius").value;
+  console.log(searchType);
+  mapQuery(radius, uOfM, searchType, keyword);
+}
+
+function mapQuery(radius, location, searchType, keyword) {
+  console.log(`map query:
+    type: ${searchType}
+    radius: ${radius}
+    location: ${location}
+    keyword: ${keyword}
+    `);
+  var request = {
+    fields: ['name', 'geometry'], // The things you want google to give back to you.
+    radius: radius,
+    location: location,
+    type: searchType,
+    keyword: keyword
+  };
+
+  service.nearbySearch(request, function(results, status, pagin) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      console.log("markers: ");
+      console.log(markers);
+      markers.forEach((e) => {
+        e.setMap(null);
+      })
+      markers = [];
+      console.log(markers);
+      for (var i = 0; i < results.length; i++) {
+        markers.push(createMarker(results[i]));
+      }
+      console.log(markers);
+
+      // map.setCenter(results[0].geometry.location);
+    }
+  });
+}
+
+function createMarker(place) {
+  var marker = new google.maps.Marker({
+    map: map,
+    position: place.geometry.location
+  });
+
+  marker.addListener('mouseover', function() {
+    infowindow.setContent(place.name);
+    infowindow.open(map, this);
+  });
+
+  // assuming you also want to hide the infowindow when user mouses-out
+  marker.addListener('mouseout', function() {
+    infowindow.close();
+  });
+  return marker;
+}
+
+
 function geocodeAddress(geocoder, map, name, address) {
-  console.log(window.location.pathname);
   geocoder.geocode({'address': address}, function(results, status) {
     if (status === 'OK') {
       let marker = new google.maps.Marker({
@@ -131,9 +225,8 @@ function geocodeAddress(geocoder, map, name, address) {
           scaledSize: new google.maps.Size(30, 30)
         }
       });
-
       addInfoWindow(marker, name);
-
+      markers.push(marker);
     } else {
       alert('Geocode was not successful for the following reason: ' + status);
     }
@@ -143,7 +236,7 @@ function geocodeAddress(geocoder, map, name, address) {
 function addInfoWindow(marker, locationName) {
   let contentString = `
     <div>
-      <h1 id="firstHeading" class="firstHeading">${locationName}</h1>
+      <h3 id="firstHeading" class="firstHeading">${locationName}</h1>
     </div>
   `;
   let infowindow = new google.maps.InfoWindow({
@@ -152,4 +245,13 @@ function addInfoWindow(marker, locationName) {
   marker.addListener('click', function() {
     infowindow.open(map, marker);
   });
+}
+
+function categoryChangeHandler(e) {
+  if (e.options[e.selectedIndex].value === "other") {
+    document.getElementById("otherInput").removeAttribute("disabled");
+  } else {
+    let otherInput = document.getElementById("otherInput")
+    otherInput.setAttribute("disabled", true);
+  }
 }

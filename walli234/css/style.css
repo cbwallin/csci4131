@@ -45,6 +45,22 @@ div.schedAndImg {
   display: flex;
 }
 
+#mapAndSearch {
+  display: flex;
+  justify-content: flex-start;
+}
+
+#searchForm {
+  width: 300px;
+  padding-left: 30px;
+  padding-top: 30px;
+}
+
+#searchButton {
+  background-color: #4786ed;
+  color: black;
+}
+
 #faveList {
   background-color: #333;
   width: 300px;
