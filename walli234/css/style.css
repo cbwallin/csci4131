@@ -1,7 +1,6 @@
 /* myStyles.css */
 table {
   width: 1000px;
-  flex: 1
 }
 
 th,
@@ -11,11 +10,6 @@ td {
 
 button {
   margin: 3px;
-}
-
-td.scheduleItem {
-  /* white-space: pre-wrap;
-  word-wrap: break-word; */
 }
 
 tr:nth-of-type(odd) {
@@ -43,6 +37,7 @@ img.enlargedImage {
 
 div.schedAndImg {
   display: flex;
+  justify-content: space-around;
 }
 
 #mapAndSearch {
@@ -50,13 +45,9 @@ div.schedAndImg {
   justify-content: flex-start;
 }
 
-#searchForm {
-  width: 300px;
-  padding-left: 30px;
-  padding-top: 30px;
-}
 
-#searchButton {
+
+#searchButton, #goButton {
   background-color: #4786ed;
   color: black;
 }
@@ -134,7 +125,7 @@ input[type=submit]:hover {
 }
 
 #calEventForm {
-  width: 400px;
+  width: 350px;
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
@@ -214,4 +205,60 @@ div.content {
   flex-direction: row;
   justify-content: center;
   margin: 5px;
+}
+
+#searchForm, #directionsForm {
+  width: 300px;
+  padding: 10px;
+  background-color: #fafcdb ;
+  margin: 30px;
+}
+#directionsBox {
+  width: 400px;
+  height: 475px;
+  padding: 10px;
+  background-color: #fafcdb ;
+  margin: 30px;
+}
+
+#directionsPanel {
+  font-family: 'Roboto','sans-serif';
+  line-height: 30px;
+  /* padding-left: 10px; */
+}
+
+#directionsPanel select, #directionsPanel input {
+  font-size: 12px;
+}
+
+#directionsPanel select {
+  width: 100%;
+}
+
+#directionsPanel i {
+  font-size: 12px;
+}
+#directionsPanel {
+  height: 100%;
+  /* float: right; */
+  width: 100%;
+  overflow-y: auto;
+}
+
+#category, #otherInput, #radius {
+  padding: 2px;
+  margin: 2px;
+}
+
+#google_translate_element {
+  width: 220px;
+}
+
+#formAndMap{
+  display: flex;
+  align-items: flex-start;
+}
+
+.formMap {
+  margin: 20px;
 }

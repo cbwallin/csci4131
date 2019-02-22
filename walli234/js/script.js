@@ -27,19 +27,13 @@ function mouseoutEvent(x) {
   x.getElementsByTagName("img")[0].setAttribute("hidden", true);
 }
 
-
-
-function validateForm(e) {
-  let alphanumericRegex = /^[\w\-\s]*$/;
-  let {
-    ename,
-    loc
-  } = document.forms["eventForm"];
-  if (!ename.value.match(alphanumericRegex) || !loc.value.match(alphanumericRegex)) {
-    alert("Event Name and Location must be alphanumeric.");
-    return false;
-  }
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en'
+  }, 'google_translate_element');
 }
+
+
 
 function checkPassStrength(e) {
   e.preventDefault();
@@ -86,6 +80,8 @@ var map;
 var service;
 var geocoder;
 var infowindow;
+var directionsService;
+var directionsDisplay;
 var uOfM = {
   lat: 44.9727,
   lng: -93.23540000009003
@@ -99,35 +95,13 @@ function initMap() {
     });
   geocoder = new google.maps.Geocoder();
   service = new google.maps.places.PlacesService(map);
-  infowindow = new google.maps.InfoWindow()
+  infowindow = new google.maps.InfoWindow();
+  directionsService = new google.maps.DirectionsService();
+  directionsDisplay = new google.maps.DirectionsRenderer();
+  directionsDisplay.setMap(map);
+  directionsDisplay.setPanel(document.getElementById('directionsPanel'));
 
   placeScheduleLocations();
-}
-
-function getCurrentLocation() {
-  let currentPos;
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      currentPos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-    }, function() {
-      handleLocationError(true, infowindow, map.getCenter());
-    });
-  } else {
-    // Browser doesn't support Geolocation
-    handleLocationError(false, infowindow, map.getCenter());
-  }
-  return currentPos;
-}
-
-function handleLocationError(browserHasGeolocation, infoWindow, currentPos) {
-  infoWindow.setPosition(currentPos);
-  infoWindow.setContent(browserHasGeolocation ?
-                        'Error: The Geolocation service failed.' :
-                        'Error: Your browser doesn\'t support geolocation.');
-  infoWindow.open(map);
 }
 
 function placeScheduleLocations() {
@@ -136,13 +110,15 @@ function placeScheduleLocations() {
     const eventNameElement = e.getElementsByClassName("eventName");
     const addressElement = e.getElementsByClassName("address");
     if (eventNameElement.length && addressElement.length) {
-      return acc.concat([[eventNameElement[0].innerHTML, addressElement[0].innerHTML]]);
+      return acc.concat([
+        [eventNameElement[0].innerHTML, addressElement[0].innerHTML]
+      ]);
     }
     return acc;
   }, []);
 
   const uniquePairs = [...new Set(pairs)];
-  uniquePairs.forEach(([name, address]) => geocodeAddress(geocoder, map, name, address));
+  uniquePairs.forEach(([name, address]) => geocodeAddress(name, address));
 }
 
 function searchMap(e) {
@@ -157,17 +133,10 @@ function searchMap(e) {
     keyword = undefined
   }
   const radius = document.getElementById("radius").value;
-  console.log(searchType);
   mapQuery(radius, uOfM, searchType, keyword);
 }
 
 function mapQuery(radius, location, searchType, keyword) {
-  console.log(`map query:
-    type: ${searchType}
-    radius: ${radius}
-    location: ${location}
-    keyword: ${keyword}
-    `);
   var request = {
     fields: ['name', 'geometry'], // The things you want google to give back to you.
     radius: radius,
@@ -176,23 +145,21 @@ function mapQuery(radius, location, searchType, keyword) {
     keyword: keyword
   };
 
-  service.nearbySearch(request, function(results, status, pagin) {
+  service.nearbySearch(request, function (results, status, pagin) {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
-      console.log("markers: ");
-      console.log(markers);
-      markers.forEach((e) => {
-        e.setMap(null);
-      })
-      markers = [];
-      console.log(markers);
+      clearMarkers();
       for (var i = 0; i < results.length; i++) {
         markers.push(createMarker(results[i]));
       }
-      console.log(markers);
-
-      // map.setCenter(results[0].geometry.location);
     }
   });
+}
+
+function clearMarkers() {
+  markers.forEach((e) => {
+    e.setMap(null);
+  });
+  markers = [];
 }
 
 function createMarker(place) {
@@ -201,21 +168,23 @@ function createMarker(place) {
     position: place.geometry.location
   });
 
-  marker.addListener('mouseover', function() {
+  marker.addListener('mouseover', function () {
     infowindow.setContent(place.name);
     infowindow.open(map, this);
   });
 
   // assuming you also want to hide the infowindow when user mouses-out
-  marker.addListener('mouseout', function() {
+  marker.addListener('mouseout', function () {
     infowindow.close();
   });
   return marker;
 }
 
 
-function geocodeAddress(geocoder, map, name, address) {
-  geocoder.geocode({'address': address}, function(results, status) {
+function geocodeAddress(name, address) {
+  geocoder.geocode({
+    'address': address
+  }, function (results, status) {
     if (status === 'OK') {
       let marker = new google.maps.Marker({
         map: map,
@@ -242,7 +211,7 @@ function addInfoWindow(marker, locationName) {
   let infowindow = new google.maps.InfoWindow({
     content: contentString
   });
-  marker.addListener('click', function() {
+  marker.addListener('click', function () {
     infowindow.open(map, marker);
   });
 }
@@ -254,4 +223,50 @@ function categoryChangeHandler(e) {
     let otherInput = document.getElementById("otherInput")
     otherInput.setAttribute("disabled", true);
   }
+}
+
+function getDirections(e) {
+  e.preventDefault();
+  document.getElementById("directionsBox").removeAttribute("hidden");
+  const dest = document.getElementById("destination").value;
+  const travelMethod = document.querySelector('input[name="transportationMethod"]:checked').value;
+  // Try HTML5 geolocation.
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var pos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      calcRoute(pos, dest, travelMethod);
+
+    }, function () {
+      handleLocationError(true, infoWindow, map.getCenter());
+    });
+  } else {
+    // Browser doesn't support Geolocation
+    handleLocationError(false, infoWindow, map.getCenter());
+  }
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+  infoWindow.setPosition(pos);
+  infoWindow.setContent(browserHasGeolocation ?
+    'Error: The Geolocation service failed.' :
+    'Error: Your browser doesn\'t support geolocation.');
+  infoWindow.open(map);
+}
+
+function calcRoute(start, end, travelMethod) {
+  var request = {
+    origin: start,
+    destination: end,
+    travelMode: travelMethod
+  };
+  directionsService.route(request, function (result, status) {
+    if (status == 'OK') {
+      clearMarkers();
+      directionsDisplay.setDirections(result);
+    } else {}
+  });
 }
