@@ -124,7 +124,7 @@ function placeScheduleLocations() {
 function searchMap(e) {
   e.preventDefault();
   var searchType, keyword;
-  const elem = document.getElementById("searchCategory");
+  const elem = document.getElementById("category");
   if (elem.options[elem.selectedIndex].value === "other") {
     searchType = undefined;
     keyword = document.getElementById("otherInput").value;
