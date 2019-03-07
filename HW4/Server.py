@@ -19,19 +19,17 @@ def client_talk(client_sock, client_addr):
     #     print(normalize_line_endings(data))
 
     req = recv_all(client_sock)
+    import os
+    print("woprking dir", os.getcwd())
     string_list = req.split(' ')
-    for x in string_list:
-        print(x)
     method = string_list[0] # First string is a method
-    requesting_file = string_list[1] #Second string is request file
-    print(method)
-    print(requesting_file)
+    requesting_file = "." + string_list[1] #Second string is request file
+    print("method: ", method)
+    print("requesting_file: ", requesting_file)
     try:
         file = open(requesting_file,'rb') # open file , r => read , b => byte format
         rdata = file.read()
         file.close()
-
-        header = 'HTTP/1.1 200 OK\n'
 
         if(requesting_file.endswith(".jpg")):
             mimetype = 'image/jpg'
@@ -39,10 +37,27 @@ def client_talk(client_sock, client_addr):
             mimetype = 'text/css'
         elif(requesting_file.endswith(".png")):
             mimetype = 'text/png'
-        else:
+        elif(requesting_file.endswith(".html")):
             mimetype = 'text/html'
 
-        header += 'Content-Type: '+str(mimetype)+'<strong>\n\n</strong>'
+        response_headers = {
+            'Content-Type': str(mimetype) + '; encoding=utf8',
+            'Content-Length': str(len(rdata)),
+            'Connection': 'close',
+        }
+
+        response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.items())
+
+        response_proto = 'HTTP/1.1'
+        response_status = '200'
+        response_status_text = 'OK' # this can be random
+
+        head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n' + response_headers_raw + '\n'
+
+        print("head: ", head)
+
+        client_sock.sendall(head.encode("utf-8"))
+        client_sock.sendall(rdata)
 
     except Exception as e:
         print("there was an error:", e)
@@ -106,7 +121,7 @@ class EchoServer:
     def accept(self):
 
         import time
-        t_end = time.time() + 5
+        t_end = time.time() + 1
         while time.time() < t_end:
             (client, address) = self.sock.accept()
             th = Thread(target=client_talk, args=(client, address))
