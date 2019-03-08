@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+
+<head>
+  <title>Cole's Webpage</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" type="text/css" href="./style.css" />
+  <script src="formScript.js"></script>
+</head>
+
+<body>
+
+
+  <div id="nav" class="nav">
+    <ul class="nav">
+      <li class="nav"><a href="MyPlacesNew.html">My Schedule</a></li>
+      <li class="nav"><a href="MyFormGET.html">Form Input</a></li>
+    </ul>
+  </div>
+
+  <div id="formAndMap">
+    <div id="calEventForm">
+      <form id="eventForm" name="eventForm" action="http://localhost:9001" method="POST">
+        <!-- onsubmit="return validateForm(event);" -->
+        <!-- <label for="dayOfTheWeek">Day of the week</label>
+        <select id="dayOfTheWeek" name="daySelector">
+          <option value="monday" selected>Monday</option>
+          <option value="tuesday">Tuesday</option>
+          <option value="wednesday">Wednesday</option>
+          <option value="thursday">Thursday</option>
+          <option value="friday">Friday</option>
+          <option value="saturday">Satuday</option>
+          <option value="sunday">Sunday</option>
+        </select>
+
+        <label for="startTime">Start Time</label>
+        <input type="time" id="startTime" name="startTime">
+
+        <label for="endTime">End Time</label>
+        <input type="time" id="endTime" name="endTime"> -->
+
+        <label for="ename">Event Name</label>
+        <input type="text" id="ename" name="eventName" required>
+
+        <label for="loc">Location</label>
+        <input type="text" id="loc" name="loc" placeholder="Click on map to autofill" required>
+
+        <!-- <label for="imgURL">Enter URL for the picture</label>
+        <input type="url" id="imgURL" name="imgURL" required placeholder="google.com/img-src... etc"> -->
+
+
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+    <div class="formMap" id="map"></div>
+  </div>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2QAZXnURFMy46QaMEAH9a5mQFlCKfWCg&libraries=places&callback=initMap"></script>
+</body>
+
+</html>

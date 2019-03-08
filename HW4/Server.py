@@ -3,8 +3,6 @@
 # for a decscription of python socket and its parameters
 
 
-# C:\Users\colew\Documents\repos\csci4131\HW4
-
 import socket
 
 from threading import Thread
@@ -43,6 +41,7 @@ class EchoServer:
 def handle_form(query_params, client_sock):
     form_data = query_params.split('&')
 
+    # Create the table to be populated with form data
     response_body = [
         '''<html><head>
             <style>
@@ -90,34 +89,34 @@ def handle_form(query_params, client_sock):
     client_sock.sendall(head.encode("utf-8"))
     client_sock.sendall(response_body_raw.encode("utf-8"))
 
+def get_accept_value(resp_list):
+    line = list(filter(lambda x: x.startswith("Accept"), resp_list))[0]
+    return line.split(": ")[1]
+
 def client_talk(client_sock, client_addr):
     req = recv_all(client_sock)
-    # print("REQU: ", req)
-    # if (not req):
-    #     client_sock.shutdown(1)
-    #     client_sock.close()
-    #     print('connection closed.')
-    #     return
-
-    string_list = req.split(' ')
-    method = string_list[0] # First string is a method
-    requesting_file = string_list[1] #Second string is request file
-    print("method: ", method)
-    print("requesting_file: ", requesting_file)
-    print("req:", req)
-
-    if (requesting_file == '/favicon.ico'):
+    if (not req):
+        # Handles empty requests
         client_sock.shutdown(1)
         client_sock.close()
         print('connection closed.')
         return
 
+    response_items = req.split('\r\n')
+    first_line = response_items[0].split(' ')
+    method = first_line[0] # First string is a method
+    requesting_file = first_line[1] #Second string is request file
+    print("req:", req)
+
+    if (requesting_file == '/favicon.ico'):
+        # I don't know how else to deal with these / get rid of them
+        client_sock.shutdown(1)
+        client_sock.close()
+        print('connection closed.')
+        return
 
     if (method == "POST"):
-        string_list = req.split('\r\n')
-        form_data = string_list[len(string_list)-1]
-
-        print("FORM DATA IS: ",  form_data)
+        form_data = response_items[len(response_items)-1]
         handle_form(form_data, client_sock)
 
 
@@ -132,12 +131,12 @@ def client_talk(client_sock, client_addr):
 
         response_proto = 'HTTP/1.1'
         response_status = '200'
-        response_status_text = 'OK' # this can be random
+        response_status_text = 'OK'
 
         head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n' + response_headers_raw + '\n'
 
         client_sock.sendall(head.encode("utf-8"))
-    else:
+    elif (method == "GET"):
         try:
             if (requesting_file.startswith("/?")):
                 # The GET request is coming from a form
@@ -147,6 +146,23 @@ def client_talk(client_sock, client_addr):
                 client_sock.shutdown(1)
                 client_sock.close()
                 print('connection closed.')
+            elif (requesting_file == "/mytube"):
+                # Redirect
+                response_headers = {
+                    'Content-Type': 'text/html; encoding=utf8',
+                    'Location': "https://www.youtube.com",
+                    'Connection': 'keep-alive',
+                }
+
+                response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.items())
+
+                response_proto = 'HTTP/1.1'
+                response_status = '301'
+                response_status_text = 'Permanently Moved'
+
+                head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n' + response_headers_raw + '\n'
+                print(head)
+                client_sock.sendall(head.encode("utf-8"))
             else:
                 # The GET request is seeking a file.
                 path = '.' + requesting_file
@@ -167,45 +183,67 @@ def client_talk(client_sock, client_addr):
                 elif(requesting_file.endswith(".mp3")):
                     mimetype = 'audio/mp3'
 
-                response_headers = {
-                    'Content-Type': str(mimetype) + '; encoding=utf8',
-                    'Content-Length': str(len(rdata)),
-                    'Connection': 'keep-alive',
-                }
+                accept = get_accept_value(response_items)
+                print(accept)
+                print(mimetype)
+                if (accept.find(mimetype) == -1 and accept != "*/*"):
+                    # The requested file is not an acceptable type
 
-                response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.items())
+                    print("\n\nThe requested file is not an acceptable type\n")
+                    send_response(client_sock, "text/html", "406", "File Doesn't Match Accepted Mimetype")
+                else:
+                    send_response(client_sock, mimetype, "200", "OK", rdata)
 
-                response_proto = 'HTTP/1.1'
-                response_status = '200'
-                response_status_text = 'OK' # this can be random
-
-                head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n' + response_headers_raw + '\n'
-
-                print(head)
-
-                client_sock.sendall(head.encode("utf-8"))
-                client_sock.sendall(rdata)
 
         except Exception as e:
             print("there was an error:", e)
-            header = 'HTTP/1.1 404 Not Found\n\n'
-            response = """<html>
-                <body>
-                    <center>
-                    <h3>Error 404: File not found</h3>
-                    <p>Python HTTP Server</p>
-                    </center>
-                </body>
-                </html>""".encode('utf-8')
+            file = open("./404.html",'rb') # open file , r => read , b => byte format
+            rdata = file.read()
+            file.close()
+            send_response(client_sock, "text/html", "404", "Not Found", rdata)
 
-    # clean up
+    else:
+        print("They used a method other than GET, POST, or HEAD")
+        send_response(client_sock, "text/html", "405", "Method Not Allowed")
+
+    # Clean up
     client_sock.shutdown(1)
     client_sock.close()
     print('connection closed.')
 
+def send_response(client_sock, mimetype, response_status, response_status_text, data=None):
+
+    if (not data) :
+        print("sending it without data")
+        response_proto = 'HTTP/1.1'
+        head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n\n'
+
+        response = ['<html><body><center>',
+            '<h3>Error : %s</h3>' % (response_status_text),
+            '<p>Python HTTP Server</p></center></body></html>'
+        ]
+        response_body_raw = ''.join(response)
+
+        client_sock.sendall(head.encode('utf-8'))
+        client_sock.sendall(response_body_raw.encode('utf-8'))
+        return
+
+    response_headers = {
+        'Content-Type': mimetype + '; encoding=utf8',
+        'Content-Length': str(len(data)),
+        'Connection': 'keep-alive',
+    }
+
+    response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.items())
+    response_proto = 'HTTP/1.1'
+    head = '%s %s %s' % (response_proto, response_status, response_status_text) + '\n' + response_headers_raw + '\n'
+
+    client_sock.sendall(head.encode('utf-8'))
+    client_sock.sendall(data)
+
 def recv_all(sock):
-    # r'''Receive everything from `sock`, until timeout occurs, meaning sender
-    # is exhausted, return result as string.'''
+    # Receive everything from `sock`, until timeout occurs, meaning sender
+    # is exhausted, return result as string
     prev_timeout = sock.gettimeout()
     try:
         sock.settimeout(0.01)
