@@ -1,0 +1,39 @@
+{
+  "schedule": [{
+    "eventName": "Remember Flu Shot",
+    "location": "Coffman",
+    "date": "Monday",
+    "stime": "10:00",
+    "etime": "12:00"
+  }, {
+    "eventName": "Complete 4131 Assignment",
+    "location": "Home",
+    "date": "Thursday",
+    "stime": "10:00",
+    "etime": "11:00"
+  }, {
+    "eventName": "Drake's BDay",
+    "location": "The Hub",
+    "date": "Friday",
+    "stime": "10:00",
+    "etime": "12:00"
+  }, {
+    "eventName": "Project Discussion",
+    "location": "Keller Commons",
+    "date": "Tuesday",
+    "stime": "10:00",
+    "etime": "11:00"
+  }, {
+    "eventName": "CSCI-4131",
+    "location": "Keller Hall",
+    "date": "Tuesday",
+    "stime": "18:30",
+    "etime": "21:00"
+  }, {
+    "eventName": "Test",
+    "location": "Keller",
+    "date": "Monday",
+    "stime": "08:00",
+    "etime": "09:30"
+  }]
+}
