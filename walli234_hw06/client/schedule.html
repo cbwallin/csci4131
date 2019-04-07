@@ -1,0 +1,59 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(() => {
+                $.ajax({
+                    url: "/getListOfEvents",
+                    dataType: "json",
+                    success: function(data, status) {
+                        data.forEach((e) => {
+                            $('#scheduleTable > tbody:last-child').append(`<tr>
+                                <td>${e.event_name}</td>
+                                <td>${e.event_location}</td>
+                                <td>${e.event_day}</td>
+                                <td>${e.event_start_time}</td>
+                                <td>${e.event_end_time}</td>
+                                </tr>`);
+
+                        });
+                    }
+                });
+
+            })
+
+        </script>
+    </head>
+    <body>
+      <nav class="navbar navbar-default">
+          <div class="container-fluid">
+              <ul class="nav navbar-nav">
+                  <li><a href="/"><b>Home</b></a></li>
+                  <li><a href="schedule"><b>Schedule</b></a></li>
+                  <li><a href="addSchedule"><b>Add Schedule Event</b></a></li>
+                  <li><a href="stock"><b>Stock Page</b></a></li>
+              </ul>
+          </div>
+      </nav>
+      <br><br>
+      <div class="container">
+          <table class="table" id="scheduleTable">
+              <thead>
+                  <tr>
+                      <th scope="col">Event Name</th>
+                      <th scope="col">Location</th>
+                      <th scope="col">Day of Week</th>
+                      <th scope="col">Start-Time</th>
+                      <th scope="col">End-Time</th>
+
+                  </tr>
+              </thead>
+              <tbody></tbody>
+          </table>
+      </div>
+    </body>
+</html>

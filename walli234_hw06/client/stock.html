@@ -1,0 +1,108 @@
+<!-- E83JXC7WDX3BCQ6Q -->
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style media="screen">
+        textarea {
+            background-color: black;
+            color: #fff;
+            font-size: 80%;
+            width: 100%;
+        },
+        /* td {
+            display: flex;
+
+        } */
+    </style>
+</head>
+
+<body>
+     <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li><a href="/"><b>Home</b></a></li>
+                <li><a href="schedule"><b>Schedule</b></a></li>
+                <li><a href="addSchedule"><b>Add Schedule Event</b></a></li>
+                <li><a href="stock"><b>Stock Page</b></a></li>
+            </ul>
+        </div>
+    </nav><br><br><br>
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-body"><center>Welcome to Stock Page</center></div>
+        </div>
+    </div>
+    <div class="container">
+
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered table-hover">
+                    <tbody>
+                        <tr>
+                            <td class="col-md-6">Company</td>
+                            <td class="col-md-6">
+                                <div class="form-group">
+                                    <select id="compSelector" name="Company">
+                                        <option value="MSFT">Microsoft</option>
+                                        <option value="BA">Boeing Company</option>
+                                        <option value="AAPL">Apple Inc</option>
+                                        <option value="AMZN">Amazon</option>
+                                        <option value="NVDA">NVIDIA Corporation</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="button">Get Data</button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <div class="container">
+        <table class="table" id="StockData">
+            <thead>
+                <tr>
+                    <th scope="col">Company-MetaData</th>
+                    <th scope="col">Stock-Info</th>
+
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+
+    <script>
+        $("button").click(function(e) {
+            const symbol = $("#compSelector").val()
+            const url = "https://www.alphavantage.co/query?"
+            const queryString = `function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=E83JXC7WDX3BCQ6Q`
+
+            $.ajax({
+                url: url+queryString,
+                dataType: "json",
+                success: function(data, status) {
+                    const meta = JSON.stringify(data["Meta Data"], undefined, 4);
+                    const other = JSON.stringify(data["Time Series (Daily)"], undefined, 4);
+                    $('#StockData > tbody:last-child').html(`<tr>
+                        <td><textarea rows=20>${meta}</textarea></td>
+                        <td><textarea rows=20>${other}</textarea></td>
+                        </tr>`);
+                }
+            });
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+/* myStyles.css */
+table {
+  width: 1000px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #ddd;
+}
+
+button {
+  margin: 3px;
+}
+
+tr:nth-of-type(odd) {
+  background-color: #dbdbdb;
+}
+
+tr:nth-of-type(even) {
+  background-color: #f7f7f7;
+}
+
+tr:hover {
+  background-color: #aaaaaa;
+}
+
+img.icon {
+  height: 50px;
+  width: 50px;
+}
+
+img.enlargedImage {
+  height: 400px;
+  width: 400px;
+  flex: 1;
+}
+
+div.schedAndImg {
+  display: flex;
+  justify-content: space-around;
+}
+
+#mapAndSearch {
+  display: flex;
+  justify-content: flex-start;
+}
+
+
+
+#searchButton, #goButton {
+  background-color: #4786ed;
+  color: black;
+}
+
+#faveList {
+  background-color: #333;
+  width: 300px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+li.place {
+  padding: 3px;
+}
+
+body {
+  margin-top: 55px;
+  background-color: #4CAF50;
+}
+
+ul.nav {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+li.nav {
+  float: left;
+}
+
+li.nav a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li.nav a:hover:not(.active) {
+  background-color: #111;
+}
+
+.active {
+  background-color: #4CAF50;
+}
+
+input[type=text], input[type=time], input[type=url], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+#calEventForm {
+  width: 350px;
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+
+#loginBody {
+    display: flex;
+    justify-content: center;
+}
+
+#logInForm {
+  width: 350px;
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+
+#container {
+  width: 400px;
+  background: #ffffff;
+  padding: 20px;
+  margin: 90px auto;
+  border-radius: 5px;
+  height: 200px;
+  border: 2px solid gray;
+}
+
+#header {
+  text-align: center;
+  background-color: #FEFFED;
+  border-radius: 5px;
+  margin: -39px -20px 10px -20px;
+}
+
+div.content {
+  margin-left: 57px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+
+
+#searchForm, #directionsForm {
+  width: 300px;
+  padding: 10px;
+  background-color: #fafcdb ;
+  margin: 30px;
+}
+
+
+#category, #otherInput, #radius {
+  padding: 2px;
+  margin: 2px;
+}
+
+#formAndMap{
+  display: flex;
+  align-items: flex-start;
+}
+
+.formMap {
+  margin: 20px;
+}
