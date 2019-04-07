@@ -1,12 +1,34 @@
 ﻿<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  </head>
-  <body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(() => {
+                $.ajax({
+                    url: "/getSchedule",
+                    dataType: "json",
+                    success: function(data, status) {
+                        data["schedule"].forEach((e) => {
+                            $('#scheduleTable > tbody:last-child').append(`<tr>
+                                <td>${e.eventName}</td>
+                                <td>${e.location}</td>
+                                <td>${e.date}</td>
+                                <td>${e.stime}</td>
+                                <td>${e.etime}</td>
+                                </tr>`);
+
+                        });
+                    }
+                });
+
+            })
+
+        </script>
+    </head>
+    <body>
       <nav class="navbar navbar-default">
           <div class="container-fluid">
               <ul class="nav navbar-nav">
@@ -33,7 +55,5 @@
               <tbody></tbody>
           </table>
       </div>
-	  //TODO : Fetch schedule.json data from the server and display it in the scheduleTable
-      
-  </body>
+    </body>
 </html>
