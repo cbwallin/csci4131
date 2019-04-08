@@ -29,12 +29,12 @@ var db = require('./db.js')
 app.use(bodyparser());
 
 // use express-session
-// in mremory session is sufficient for this assignment
-// app.use(session({
-//   secret: "csci4131secretkey",
-//   saveUninitialized: true,
-//   resave: false}
-// ));
+// in memory session is sufficient for this assignment
+app.use(session({
+  secret: "csci4131secretkey",
+  saveUninitialized: true,
+  resave: false}
+));
 
 // server listens on port 9007 for incoming connections
 app.listen(9007, () => console.log('Listening on port 9007!'));
@@ -49,20 +49,37 @@ app.get('/',function(req, res) {
 // // GET method route for the events page.
 // It serves schedule.html present in client folder
 app.get('/schedule',function(req, res) {
-  //Add Details
-  res.sendFile(path.join(__dirname, '/client/schedule.html'));
+    console.log(req.session.views);
+    if (req.session.views > 0) {
+        console.log("You have valid credentials!");
+        req.session.views += 1;
+        res.sendFile(path.join(__dirname, '/client/schedule.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '/client/login.html'));
+    }
 });
 
 // GET method route for the addEvents page.
 // It serves addSchedule.html present in client folder
 app.get('/addSchedule',function(req, res) {
-  //Add Details
-  res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
+    if (req.session.views > 0) {
+        console.log("You have valid credentials!");
+        req.session.views += 1;
+        res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '/client/login.html'));
+    }
 });
+
 //GET method for stock page
 app.get('/stock', function (req, res) {
-    res.sendFile(path.join(__dirname, '/client/stock.html'));
-
+    if (req.session.views > 0) {
+        console.log("You have valid credentials!");
+        req.session.views += 1;
+        res.sendFile(path.join(__dirname, '/client/stock.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '/client/login.html'));
+    }
 });
 
 // GET method route for the login page.
@@ -84,8 +101,6 @@ app.get('/getListOfEvents', function(req, res) {
 
 // POST method to insert details of a new event to tbl_events table
 app.post('/postEvent', function(req, res) {
-  //Add Details
-  console.log(req.body)
   addScheduleEntry(req.body);
   res.sendFile(path.join(__dirname, '/client/schedule.html'));
 });
@@ -95,7 +110,7 @@ function addScheduleEntry(reqBody) {
                VALUES ('${reqBody.eventName}', '${reqBody.location}', '${reqBody.date}', '${reqBody.stime}', '${reqBody.etime}');`;
     db.get().query(sql, function (err, rows) {
         if (err) throw err;
-        console.log("inserted 1 row")
+        console.log("Successfully inserted 1 row")
     });
 
 }
@@ -103,13 +118,36 @@ function addScheduleEntry(reqBody) {
 // POST method to validate user login
 // upon successful login, user session is created
 app.post('/sendLoginDetails', function(req, res) {
-  //Add Details
+    if (isValidCredentials(req.body.username, req.body.password)) {
+        req.session.views = 1;
+        res.sendFile(path.join(__dirname, '/client/schedule.html'));
+        //redirect to the schedule page
+    } else {
+        // Send a response indicating a failure
+        console.log("You entered invalid data. please try again.");
+    }
 });
+
+async function isValidCredentials(username, password) {
+    console.log(`isValidCredentials called with ${username}, ${password}`);
+    const hashedPass = crypto.createHash('sha256').update(password).digest('base64')
+    var sql = `SELECT count(*) FROM tbl_accounts WHERE acc_login='${username}' AND acc_password='${hashedPass}';`;
+    await db.get().query(sql, function (err, results) {
+        if (err) throw err;
+        const count = Object.values(results[0])[0];
+        console.log(`count is: ${count}`);
+        if (count > 0) {
+            return true;
+        }
+        return false;
+    });
+}
 
 // log out of the application
 // destroy user session
 app.get('/logout', function(req, res) {
-  //Add Details
+    req.session.destroy();
+    res.sendFile(path.join(__dirname, '/client/login.html'));
 });
 
 // middle ware to serve static files
