@@ -33,65 +33,65 @@ app.use(bodyparser());
 app.use(session({
   secret: "csci4131secretkey",
   saveUninitialized: true,
-  resave: false}
-));
+  resave: false
+}));
 
 // server listens on port 9007 for incoming connections
 app.listen(9007, () => console.log('Listening on port 9007!'));
 
 // app.use(express.static(path.join(__dirname, 'client')));
 
-app.get('/',function(req, res) {
-    // res.send(__dirname + '/client/welcome.html')
-	res.sendFile(path.join(__dirname, '/client/welcome.html'));
+app.get('/', function (req, res) {
+  // res.send(__dirname + '/client/welcome.html')
+  res.sendFile(path.join(__dirname, '/client/welcome.html'));
 });
 
 // // GET method route for the events page.
 // It serves schedule.html present in client folder
-app.get('/schedule',function(req, res) {
-    console.log(req.session.views);
-    if (req.session.views > 0) {
-        console.log("You have valid credentials!");
-        req.session.views += 1;
-        res.sendFile(path.join(__dirname, '/client/schedule.html'));
-    } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
-    }
+app.get('/schedule', function (req, res) {
+  console.log(req.session.views);
+  if (req.session.views > 0) {
+    console.log("You have valid credentials!");
+    req.session.views += 1;
+    res.sendFile(path.join(__dirname, '/client/schedule.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '/client/login.html'));
+  }
 });
 
 // GET method route for the addEvents page.
 // It serves addSchedule.html present in client folder
-app.get('/addSchedule',function(req, res) {
-    if (req.session.views > 0) {
-        console.log("You have valid credentials!");
-        req.session.views += 1;
-        res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
-    } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
-    }
+app.get('/addSchedule', function (req, res) {
+  if (req.session.views > 0) {
+    console.log("You have valid credentials!");
+    req.session.views += 1;
+    res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '/client/login.html'));
+  }
 });
 
 //GET method for stock page
 app.get('/stock', function (req, res) {
-    if (req.session.views > 0) {
-        console.log("You have valid credentials!");
-        req.session.views += 1;
-        res.sendFile(path.join(__dirname, '/client/stock.html'));
-    } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
-    }
+  if (req.session.views > 0) {
+    console.log("You have valid credentials!");
+    req.session.views += 1;
+    res.sendFile(path.join(__dirname, '/client/stock.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '/client/login.html'));
+  }
 });
 
 // GET method route for the login page.
 // It serves login.html present in client folder
-app.get('/login',function(req, res) {
+app.get('/login', function (req, res) {
   //Add Details
   res.sendFile(path.join(__dirname, '/client/login.html'));
 });
 
 // GET method to return the list of events
 // The function queries the table events for the list of places and sends the response back to client
-app.get('/getListOfEvents', function(req, res) {
+app.get('/getListOfEvents', function (req, res) {
   var sql = "SELECT * FROM tbl_events;";
   db.get().query(sql, function (err, rows) {
     if (err) throw err;
@@ -100,54 +100,55 @@ app.get('/getListOfEvents', function(req, res) {
 });
 
 // POST method to insert details of a new event to tbl_events table
-app.post('/postEvent', function(req, res) {
+app.post('/postEvent', function (req, res) {
   addScheduleEntry(req.body);
   res.sendFile(path.join(__dirname, '/client/schedule.html'));
 });
 
 function addScheduleEntry(reqBody) {
-    var sql = `INSERT INTO tbl_events (event_name, event_location, event_day, event_start_time, event_end_time)
+  var sql = `INSERT INTO tbl_events (event_name, event_location, event_day, event_start_time, event_end_time)
                VALUES ('${reqBody.eventName}', '${reqBody.location}', '${reqBody.date}', '${reqBody.stime}', '${reqBody.etime}');`;
-    db.get().query(sql, function (err, rows) {
-        if (err) throw err;
-        console.log("Successfully inserted 1 row")
-    });
+  db.get().query(sql, function (err, rows) {
+    if (err) throw err;
+    console.log("Successfully inserted 1 row")
+  });
 
 }
 
 // POST method to validate user login
 // upon successful login, user session is created
-app.post('/sendLoginDetails', function(req, res) {
-    if (isValidCredentials(req.body.username, req.body.password)) {
-        req.session.views = 1;
-        res.sendFile(path.join(__dirname, '/client/schedule.html'));
-        //redirect to the schedule page
-    } else {
-        // Send a response indicating a failure
-        console.log("You entered invalid data. please try again.");
-    }
+app.post('/sendLoginDetails', function (req, res) {
+  if (isValidCredentials(req.body.username, req.body.password)) {
+    req.session.views = 1;
+    res.sendFile(path.join(__dirname, '/client/schedule.html'));
+    //redirect to the schedule page
+  } else {
+    // Send a response indicating a failure
+    console.log("You entered invalid data. please try again.");
+  }
 });
 
 async function isValidCredentials(username, password) {
-    console.log(`isValidCredentials called with ${username}, ${password}`);
-    const hashedPass = crypto.createHash('sha256').update(password).digest('base64')
-    var sql = `SELECT count(*) FROM tbl_accounts WHERE acc_login='${username}' AND acc_password='${hashedPass}';`;
-    await db.get().query(sql, function (err, results) {
-        if (err) throw err;
-        const count = Object.values(results[0])[0];
-        console.log(`count is: ${count}`);
-        if (count > 0) {
-            return true;
-        }
-        return false;
-    });
+  console.log(`isValidCredentials called with ${username}, ${password}`);
+  const hashedPass = crypto.createHash('sha256').update(password).digest('base64')
+  var sql = `SELECT count(*) FROM tbl_accounts WHERE acc_login='${username}' AND acc_password='${hashedPass}';`;
+  await db.get().query(sql, function (err, results) {
+    if (err) throw err;
+    const count = Object.values(results[0])[0];
+    console.log(`count is: ${count}`);
+    if (count > 0) {
+      return true;
+    }
+    return false;
+  });
 }
 
 // log out of the application
 // destroy user session
-app.get('/logout', function(req, res) {
-    req.session.destroy();
-    res.sendFile(path.join(__dirname, '/client/login.html'));
+app.get('/logout', function (req, res) {
+  req.session.destroy();
+  res.sendFile(path.join(__dirname, '/client/login.html'));
+  //res.redirect('/login');
 });
 
 // middle ware to serve static files
@@ -155,6 +156,6 @@ app.use('/client', express.static(__dirname + '/client'));
 
 
 // function to return the 404 message and error to client
-app.get('*', function(req, res) {
+app.get('*', function (req, res) {
   // add details
 });
