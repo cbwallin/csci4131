@@ -1,23 +1,35 @@
 // establish connection to MYSQL database
 
 var mysql = require("mysql");
+var xml2js = require('xml2js');
+var fs = require("fs");
 
-var connection = mysql.createConnection({
-  host: "cse-curly.cse.umn.edu",
-  user: "C4131S19G117",
-  password: "13719",
-  database: "C4131S19G117",
-  port: 3306
+var parser = new xml2js.Parser();
+
+fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+    parser.parseString(data, function (err, result) {
+        const config = result["dbconfig"];
+        console.dir(config);
+        console.log('Done');
+        
+
+        cnx = mysql.createConnection({
+            host: config["host"][0],
+            user: config["user"][0],
+            password: config["password"][0],
+            database: config["database"][0],
+            port: config["port"][0]
+        });
+        cnx.connect(function(err) {
+            if (err) {
+                throw err;
+            };
+            console.log("Connected to MYSQL database!");
+        });
+        exports.get = function() {
+          return cnx;
+        }
+
+    });
+
 });
-
-connection.connect(function(err) {
-  if (err) {
-    throw err;
-  };
-  console.log("Connected to MYSQL database!");
-});
-
-// export the connection
-exports.get = function() {
-  return connection;
-}

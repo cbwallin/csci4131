@@ -47,13 +47,22 @@ app.get('/',function(req, res) {
 // // GET method route for the events page.
 // It serves schedule.html present in client folder
 app.get('/schedule',function(req, res) {
-    console.log(req.session.views);
     if (req.session.views > 0) {
         console.log("You have valid credentials!");
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/schedule.html'));
     } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
+        res.redirect('/login');
+    }
+});
+
+app.get('/admin', function(req, res) {
+    if (req.session.views > 0) {
+        console.log("You have valid credentials!");
+        req.session.views += 1;
+        res.sendFile(path.join(__dirname, '/client/admin.html'));
+    } else {
+        res.redirect('/login');
     }
 });
 
@@ -65,7 +74,7 @@ app.get('/addSchedule',function(req, res) {
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
     } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
+        res.redirect('/login');
     }
 });
 
@@ -76,7 +85,7 @@ app.get('/stock', function (req, res) {
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/stock.html'));
     } else {
-        res.sendFile(path.join(__dirname, '/client/login.html'));
+        res.redirect('/login');
     }
 });
 
@@ -97,10 +106,18 @@ app.get('/getListOfEvents', function(req, res) {
   });
 });
 
+app.get('/getListOfUsers', function(req, res) {
+  var sql = "SELECT * FROM tbl_accounts;";
+  db.get().query(sql, function (err, rows) {
+    if (err) throw err;
+    res.send(rows);
+  });
+});
+
 // POST method to insert details of a new event to tbl_events table
 app.post('/postEvent', function(req, res) {
   addScheduleEntry(req.body);
-  res.sendFile(path.join(__dirname, '/client/schedule.html'));
+  res.redirect('/schedule');
 });
 
 function addScheduleEntry(reqBody) {
@@ -110,8 +127,34 @@ function addScheduleEntry(reqBody) {
         if (err) throw err;
         console.log("Successfully inserted 1 row")
     });
-
 }
+
+// POST method to insert new user into tbl_accounts table
+app.post('/postUser', function(req, res) {
+    console.log(req.body);
+    var validateQuery = `SELECT count(*) FROM tbl_accounts WHERE acc_login = '${req.body.acc_login}';`;
+    db.get().query(validateQuery, function (err, results) {
+        if (err) throw err;
+        const count = Object.values(results[0])[0];
+        console.log(`Num users is: ${count}`);
+        if (count > 0) {
+            //THere is already a users
+            // throw new Error("This login is used by another user");
+            res.send("error");
+        } else {
+            // insert a new tbl_account
+            var insertQuery = ` INSERT INTO tbl_accounts (acc_name, acc_login, acc_password)
+                                VALUES ('${req.body.acc_name}', '${req.body.acc_login}', '${req.body.acc_password}');`;
+            db.get().query(insertQuery, function (err, results) {
+                if (err) throw err;
+                console.log("Successfully inserted 1 row")
+                res.send("OK");
+                // res.redirect('/admin');
+            });
+
+        }
+    });
+});
 
 // POST method to validate user login
 // upon successful login, user session is created
@@ -124,7 +167,7 @@ app.post('/sendLoginDetails', (req, res) => {
         console.log(`count is: ${count}`);
         if (count > 0) {
             req.session.views = 1;
-            res.sendFile(path.join(__dirname, '/client/schedule.html'));
+            res.redirect('/schedule');
         } else {
             console.log("You entered invalid data. please try again.");
             res.sendFile(path.join(__dirname, '/client/failedLogin.html'));
@@ -132,11 +175,12 @@ app.post('/sendLoginDetails', (req, res) => {
     });
 });
 
+
 // log out of the application
 // destroy user session
 app.get('/logout', function(req, res) {
     req.session.destroy();
-    res.sendFile(path.join(__dirname, '/client/login.html'));
+    res.redirect('/login');
 });
 
 // middle ware to serve static files
