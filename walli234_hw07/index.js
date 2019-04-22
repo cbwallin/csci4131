@@ -31,22 +31,22 @@ app.use(bodyparser());
 // use express-session
 // in memory session is sufficient for this assignment
 app.use(session({
-  secret: "csci4131secretkey",
-  saveUninitialized: true,
-  resave: false}
-));
+    secret: "csci4131secretkey",
+    saveUninitialized: true,
+    resave: false
+}));
 
 // server listens on port 9007 for incoming connections
 app.listen(9007, () => console.log('Listening on port 9007!'));
 
 
-app.get('/',function(req, res) {
-	res.sendFile(path.join(__dirname, '/client/welcome.html'));
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname, '/client/welcome.html'));
 });
 
 // // GET method route for the events page.
 // It serves schedule.html present in client folder
-app.get('/schedule',function(req, res) {
+app.get('/schedule', function(req, res) {
     if (req.session.views > 0) {
         console.log("You have valid credentials!");
         req.session.views += 1;
@@ -68,7 +68,7 @@ app.get('/admin', function(req, res) {
 
 // GET method route for the addEvents page.
 // It serves addSchedule.html present in client folder
-app.get('/addSchedule',function(req, res) {
+app.get('/addSchedule', function(req, res) {
     if (req.session.views > 0) {
         console.log("You have valid credentials!");
         req.session.views += 1;
@@ -79,7 +79,7 @@ app.get('/addSchedule',function(req, res) {
 });
 
 //GET method for stock page
-app.get('/stock', function (req, res) {
+app.get('/stock', function(req, res) {
     if (req.session.views > 0) {
         console.log("You have valid credentials!");
         req.session.views += 1;
@@ -91,39 +91,52 @@ app.get('/stock', function (req, res) {
 
 // GET method route for the login page.
 // It serves login.html present in client folder
-app.get('/login',function(req, res) {
-  //Add Details
-  res.sendFile(path.join(__dirname, '/client/login.html'));
+app.get('/login', function(req, res) {
+    //Add Details
+    res.sendFile(path.join(__dirname, '/client/login.html'));
 });
 
 // GET method to return the list of events
 // The function queries the table events for the list of places and sends the response back to client
 app.get('/getListOfEvents', function(req, res) {
-  var sql = "SELECT * FROM tbl_events;";
-  db.get().query(sql, function (err, rows) {
-    if (err) throw err;
-    res.send(rows);
-  });
+    var sql = "SELECT * FROM tbl_events;";
+    db.get().query(sql, function(err, rows) {
+        if (err) throw err;
+        res.send(rows);
+    });
 });
 
 app.get('/getListOfUsers', function(req, res) {
-  var sql = "SELECT * FROM tbl_accounts;";
-  db.get().query(sql, function (err, rows) {
-    if (err) throw err;
-    res.send(rows);
-  });
+    var sql = "SELECT acc_id, acc_name, acc_login FROM tbl_accounts;";
+    db.get().query(sql, function(err, rows) {
+        if (err) throw err;
+        res.send(rows);
+    });
+});
+
+app.post('/deleteUser', function(req, res) {
+    if (req.session.name === req.body.acc_login) {
+        res.send("error");
+    } else {
+        console.log(req.body.acc_login);
+        var sql = `DELETE FROM tbl_accounts WHERE acc_login='${req.body.acc_login}';`;
+        db.get().query(sql, function(err, rows) {
+            if (err) throw err;
+            res.send('OK');
+        });
+    }
 });
 
 // POST method to insert details of a new event to tbl_events table
 app.post('/postEvent', function(req, res) {
-  addScheduleEntry(req.body);
-  res.redirect('/schedule');
+    addScheduleEntry(req.body);
+    res.redirect('/schedule');
 });
 
 function addScheduleEntry(reqBody) {
     var sql = `INSERT INTO tbl_events (event_name, event_location, event_day, event_start_time, event_end_time)
                VALUES ('${reqBody.eventName}', '${reqBody.location}', '${reqBody.date}', '${reqBody.stime}', '${reqBody.etime}');`;
-    db.get().query(sql, function (err, rows) {
+    db.get().query(sql, function(err, rows) {
         if (err) throw err;
         console.log("Successfully inserted 1 row")
     });
@@ -131,9 +144,8 @@ function addScheduleEntry(reqBody) {
 
 // POST method to insert new user into tbl_accounts table
 app.post('/postUser', function(req, res) {
-    console.log(req.body);
     var validateQuery = `SELECT count(*) FROM tbl_accounts WHERE acc_login = '${req.body.acc_login}';`;
-    db.get().query(validateQuery, function (err, results) {
+    db.get().query(validateQuery, function(err, results) {
         if (err) throw err;
         const count = Object.values(results[0])[0];
         console.log(`Num users is: ${count}`);
@@ -143,9 +155,10 @@ app.post('/postUser', function(req, res) {
             res.send("error");
         } else {
             // insert a new tbl_account
+            const hashedPass = crypto.createHash('sha256').update(req.body.acc_password).digest('base64')
             var insertQuery = ` INSERT INTO tbl_accounts (acc_name, acc_login, acc_password)
-                                VALUES ('${req.body.acc_name}', '${req.body.acc_login}', '${req.body.acc_password}');`;
-            db.get().query(insertQuery, function (err, results) {
+                                VALUES ('${req.body.acc_name}', '${req.body.acc_login}', '${hashedPass}');`;
+            db.get().query(insertQuery, function(err, results) {
                 if (err) throw err;
                 console.log("Successfully inserted 1 row")
                 res.send("OK");
@@ -161,12 +174,13 @@ app.post('/postUser', function(req, res) {
 app.post('/sendLoginDetails', (req, res) => {
     const hashedPass = crypto.createHash('sha256').update(req.body.password).digest('base64')
     var sql = `SELECT count(*) FROM tbl_accounts WHERE acc_login='${req.body.username}' AND acc_password='${hashedPass}';`;
-    db.get().query(sql, function (err, results) {
+    db.get().query(sql, function(err, results) {
         if (err) throw err;
         const count = Object.values(results[0])[0];
         console.log(`count is: ${count}`);
         if (count > 0) {
             req.session.views = 1;
+            req.session.name = req.body.username;
             res.redirect('/schedule');
         } else {
             console.log("You entered invalid data. please try again.");
@@ -189,5 +203,5 @@ app.use('/client', express.static(__dirname + '/client'));
 
 // function to return the 404 message and error to client
 app.get('*', function(req, res) {
-  res.status(404).send('404 Not found.');
+    res.status(404).send('404 Not found.');
 });

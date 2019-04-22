@@ -19,7 +19,7 @@
                                 <td>${e.acc_id}</td>
                                 <td>${e.acc_name}</td>
                                 <td>${e.acc_login}</td>
-                                <td>${e.acc_password}</td>
+                                <td></td>
                                 <td>
                                     <span class='btnEdit glyphicon glyphicon-pencil'></span> &nbsp; &nbsp;
                                     <span style="display: none;" class='btnSave glyphicon glyphicon-floppy-disk'></span> &nbsp; &nbsp;
@@ -61,6 +61,28 @@
 		            $(".add-new").removeAttr("disabled");
                 });
 
+                $(document).on("click", ".btnDelete", function(){
+                    var $row = jQuery(this).closest('tr');
+                    var $columns = $row.find('td');
+                    var values = [];
+
+                    jQuery.each($columns, function(i, item) {
+                        values = values.concat(item.innerHTML);
+                    });
+                    console.log(`${values[1]}, ${values[2]}`);
+                    const params = {
+                        'acc_name': values[1],
+                        'acc_login': values[2]
+                    }
+                    $.post( "/deleteUser", params, function(data, status) {
+                        if(data === 'error') {
+                            alert("Cannot delete a user that is logged in!");
+                        } else {
+                            location.reload(true);
+                        }
+                    });
+                });
+
                 $(document).on("click", ".btnSave", function(e){
                     // console.log(e.target.parentElement.parentElement);
                     // const test = $(this).parents("tr")[0];
@@ -76,13 +98,10 @@
                     });
                     $(this).parents("tr").find(".error").first().focus();
                     if(!empty){
-                        console.log(input)
                         var test = [];
             			input.each(function(){
                             test = test.concat($(this).val());
             			});
-            			// $(this).parents("tr").find(".btnSave, .btnEdit").toggle();
-            			// $(".add-new").removeAttr("disabled");
             		}
                     let params = {
                         'acc_name': test[0],
