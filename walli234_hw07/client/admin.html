@@ -17,12 +17,12 @@
                         data.forEach((e) => {
                             $('#scheduleTable > tbody:last-child').append(`<tr>
                                 <td>${e.acc_id}</td>
-                                <td>${e.acc_name}</td>
-                                <td>${e.acc_login}</td>
-                                <td></td>
+                                <td class="name">${e.acc_name}</td>
+                                <td class="login">${e.acc_login}</td>
+                                <td class="password"></td>
                                 <td>
                                     <span class='btnEdit glyphicon glyphicon-pencil'></span> &nbsp; &nbsp;
-                                    <span style="display: none;" class='btnSave glyphicon glyphicon-floppy-disk'></span> &nbsp; &nbsp;
+                                    <span style="display: none;" class='btnSaveEdit glyphicon glyphicon-floppy-disk'></span> &nbsp; &nbsp;
                                     <span class='btnDelete glyphicon glyphicon-trash'></span>
                                 </td>
                                 </tr>`);
@@ -49,11 +49,49 @@
 
                 $(document).on("click", ".btnEdit", function(){
                     console.log("you clicked edit.");
-                    $(this).parents("tr").find("td:not(:last-child)").each(function(){
+                    $(this).parents("tr").find("td:not(:last-child, :first-child)").each(function(){
             			$(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
             		});
-            		$(this).parents("tr").find(".btnSave, .btnEdit").toggle();
+            		$(this).parents("tr").find(".btnSaveEdit, .btnEdit").toggle();
             		$(".add-new").attr("disabled", "disabled");
+                });
+
+                $(document).on("click", ".btnSaveEdit", function(){
+                    console.log(this);
+                    const loginOriginal = $(this).parents("tr").find('td.login').find('input')[0].getAttribute('value').trim();
+                    var empty = false;
+                    var input = $(this).parents("tr").find('input[type="text"]');
+                    input.each(function(){
+            			if(!$(this).val()){
+            				$(this).addClass("error");
+            				empty = true;
+            			} else{
+                            $(this).removeClass("error");
+                        }
+                    });
+                    $(this).parents("tr").find(".error").first().focus();
+                    if(!empty){
+                        var test = [];
+            			input.each(function(){
+                            test = test.concat($(this).val());
+            			});
+                        let params = {
+                            'acc_name': test[0],
+                            'acc_login': test[1],
+                            'acc_password': test[2],
+                            'old_login': loginOriginal
+
+                        }
+                        console.log(params);
+                        $.post( "/editUser", params, function(data, status) {
+                            if(data === 'error') {
+                                $("#errorMsg").css("display", "block");
+                                // alert("This login is used by another user");
+                            } else {
+                                location.reload(true);
+                            }
+                        });
+            		}
                 });
 
                 $(document).on("click", ".btnRemove", function(){
@@ -76,7 +114,8 @@
                     }
                     $.post( "/deleteUser", params, function(data, status) {
                         if(data === 'error') {
-                            alert("Cannot delete a user that is logged in!");
+                            // alert("Cannot delete a user that is logged in!");
+                            $("#errorMsg").css("display", "block");
                         } else {
                             location.reload(true);
                         }
@@ -111,7 +150,8 @@
                     }
                     $.post( "/postUser", params, function(data, status) {
                         if(data === 'error') {
-                            alert("This login is used by another user");
+                            // alert("This login is used by another user");
+                            $("#errorMsg").css("display", "block");
                         } else {
                             location.reload(true);
                         }
@@ -139,6 +179,10 @@
         <br><br>
 
         <div class="container">
+            <div style="display: flex; justify-content: center;" class="row">
+                <p style="color: red; display: none;" id="errorMsg">This login is used by another user</p>
+            </div>
+
             <div class="row">
                 <button class="btn btn-primary add-new" type="button"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add User</button>
             </div>

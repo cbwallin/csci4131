@@ -169,6 +169,33 @@ app.post('/postUser', function(req, res) {
     });
 });
 
+app.post('/editUser', function(req, res) {
+    var validateQuery = `SELECT count(*) FROM tbl_accounts WHERE acc_login = '${req.body.acc_login}';`;
+    db.get().query(validateQuery, function(err, results) {
+        if (err) throw err;
+        const count = Object.values(results[0])[0];
+        console.log(`Num users is: ${count}`);
+        if (count > 0 && req.body.acc_login !== req.body.old_login) {
+            //THere is already a user
+            res.send("error");
+        } else {
+            // insert a new tbl_account
+            const hashedPass = crypto.createHash('sha256').update(req.body.acc_password).digest('base64')
+            var updateQuery = ` UPDATE tbl_accounts
+                                SET acc_name = '${req.body.acc_name}', acc_login = '${req.body.acc_login}', acc_password = '${hashedPass}'
+                                WHERE acc_login = '${req.body.old_login}'`;
+            console.log(updateQuery);
+            db.get().query(updateQuery, function(err, results) {
+                if (err) throw err;
+                console.log("Successfully updated 1 row");
+                res.send("OK");
+                // res.redirect('/admin');
+            });
+
+        }
+    });
+});
+
 // POST method to validate user login
 // upon successful login, user session is created
 app.post('/sendLoginDetails', (req, res) => {
