@@ -10,6 +10,11 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script type="text/javascript">
             $(document).ready(() => {
+
+                $.get( "/getActiveUser", function(data, status) {
+                    $('#userWelcome').html($('#userWelcome').text() + ` ${data}!`);
+                });
+
                 $.ajax({
                     url: "/getListOfUsers",
                     dataType: "json",
@@ -24,6 +29,7 @@
                                     <span class='btnEdit glyphicon glyphicon-pencil'></span> &nbsp; &nbsp;
                                     <span style="display: none;" class='btnSaveEdit glyphicon glyphicon-floppy-disk'></span> &nbsp; &nbsp;
                                     <span class='btnDelete glyphicon glyphicon-trash'></span>
+                                    <span style="display: none;" class='btnCancel glyphicon glyphicon-remove'></span>
                                 </td>
                                 </tr>`);
 
@@ -48,16 +54,20 @@
                 });
 
                 $(document).on("click", ".btnEdit", function(){
-                    console.log("you clicked edit.");
                     $(this).parents("tr").find("td:not(:last-child, :first-child)").each(function(){
             			$(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
             		});
-            		$(this).parents("tr").find(".btnSaveEdit, .btnEdit").toggle();
+            		$(this).parents("tr").find(".btnSaveEdit, .btnEdit, .btnCancel, .btnDelete").toggle();
             		$(".add-new").attr("disabled", "disabled");
                 });
 
+                $(document).on("click", ".btnCancel", function(){
+                    location.reload(true);
+                });
+
+
+
                 $(document).on("click", ".btnSaveEdit", function(){
-                    console.log(this);
                     const loginOriginal = $(this).parents("tr").find('td.login').find('input')[0].getAttribute('value').trim();
                     var empty = false;
                     var input = $(this).parents("tr").find('input[type="text"]');
@@ -82,11 +92,9 @@
                             'old_login': loginOriginal
 
                         }
-                        console.log(params);
                         $.post( "/editUser", params, function(data, status) {
                             if(data === 'error') {
                                 $("#errorMsg").css("display", "block");
-                                // alert("This login is used by another user");
                             } else {
                                 location.reload(true);
                             }
@@ -123,8 +131,6 @@
                 });
 
                 $(document).on("click", ".btnSave", function(e){
-                    // console.log(e.target.parentElement.parentElement);
-                    // const test = $(this).parents("tr")[0];
                     var empty = false;
                     var input = $(this).parents("tr").find('input[type="text"]');
                     input.each(function(){
@@ -150,7 +156,6 @@
                     }
                     $.post( "/postUser", params, function(data, status) {
                         if(data === 'error') {
-                            // alert("This login is used by another user");
                             $("#errorMsg").css("display", "block");
                         } else {
                             location.reload(true);
@@ -174,6 +179,7 @@
                     <li><a href="admin"><b>Admin</b></a></li>
                     <li><a href="logout"><span class="glyphicon glyphicon-log-out"></span></a></li>
                 </ul>
+                <p id="userWelcome" style="right:50px; top:12px; position:absolute">Welcome</p>
             </div>
         </nav>
         <br><br>

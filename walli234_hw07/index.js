@@ -44,6 +44,10 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '/client/welcome.html'));
 });
 
+app.get('/getActiveUser', function(req, res) {
+    res.send(req.session.name);
+});
+
 // // GET method route for the events page.
 // It serves schedule.html present in client folder
 app.get('/schedule', function(req, res) {

@@ -7,6 +7,12 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script type="text/javascript">
             $(document).ready(() => {
+                $.get( "/getActiveUser", function(data, status) {
+                    console.log(data);
+                    console.log($('#userWelcome'));
+                    $('#userWelcome').html($('#userWelcome').text() + ` ${data}!`);
+                });
+
                 $.ajax({
                     url: "/getListOfEvents",
                     dataType: "json",
@@ -23,8 +29,7 @@
                         });
                     }
                 });
-
-            })
+            });
 
         </script>
     </head>
@@ -38,6 +43,7 @@
                   <li><a href="stock"><b>Stock Page</b></a></li>
                   <li><a href="admin"><b>Admin</b></a></li>
                   <li><a href="logout"><span class="glyphicon glyphicon-log-out"></span></a></li>
+                  <p id="userWelcome" style="right:50px; top:12px; position:absolute">Welcome</p>
               </ul>
           </div>
       </nav>
