@@ -49,7 +49,6 @@ app.get('/',function(req, res) {
 app.get('/schedule',function(req, res) {
     console.log(req.session.views);
     if (req.session.views > 0) {
-        console.log("You have valid credentials!");
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/schedule.html'));
     } else {
@@ -61,7 +60,6 @@ app.get('/schedule',function(req, res) {
 // It serves addSchedule.html present in client folder
 app.get('/addSchedule',function(req, res) {
     if (req.session.views > 0) {
-        console.log("You have valid credentials!");
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/addSchedule.html'));
     } else {
@@ -72,7 +70,6 @@ app.get('/addSchedule',function(req, res) {
 //GET method for stock page
 app.get('/stock', function (req, res) {
     if (req.session.views > 0) {
-        console.log("You have valid credentials!");
         req.session.views += 1;
         res.sendFile(path.join(__dirname, '/client/stock.html'));
     } else {
